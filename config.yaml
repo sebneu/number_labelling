@@ -1,0 +1,13 @@
+
+
+graph-setup:
+  nodes:
+    min: 50
+    max: 100
+  normalize-dist: true
+  dist-function: kolmogorov_dist
+  feature-vector: FV1
+local-files: local
+properties: props.csv
+api:
+  port: 8081
