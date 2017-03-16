@@ -1,0 +1,4 @@
+#! /usr/bin/env python
+
+import web.server
+web.server.start()

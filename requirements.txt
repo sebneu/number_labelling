@@ -1,4 +1,4 @@
--e git+git@github.com:sebneu/anycsv.git#egg=anycsv
+numpy
 scipy
 sklearn
 pyyaml

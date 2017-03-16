@@ -100,7 +100,7 @@ def parse_args():
     return args
 
 
-if __name__ == "__main__":
+def start():
     args = parse_args()
     # setup logging
     if args.debug:
@@ -111,14 +111,14 @@ if __name__ == "__main__":
         logging.basicConfig(level=level, format='%(asctime)s %(levelname)s %(message)s', filename=args.logfile)
     else:
         logging.basicConfig(level=level, format='%(asctime)s %(levelname)s %(message)s')
-    # setup upload folder
-    UPLOAD_FOLDER = 'submitted/'
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.mkdir(UPLOAD_FOLDER)
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-    with open("config.yaml", 'r') as ymlfile:
+    if not args.config:
+        logging.error("Specify a config file: -c config.yaml")
+        return
+
+    with open(args.config, 'r') as ymlfile:
         config = yaml.load(ymlfile)
+
     props = labeller.parse_props(config=config)
     num_labeller = NumLabeller(props, config)
     app.config['LABELLER'] = num_labeller
@@ -126,3 +126,4 @@ if __name__ == "__main__":
     logging.info("Service running at: http://localhost:"+str(config['api']['port'])+'/labelling')
     logging.info("Example curl request: curl -X POST -F csv=@/path/to/file.csv http://localhost:"+str(config['api']['port'])+"/labelling?column=1&neighbours=10")
     app.run(threaded=True, port=config['api']['port'], host='0.0.0.0')
+
