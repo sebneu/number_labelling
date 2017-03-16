@@ -167,7 +167,7 @@ class LocalDB():
 
 
 def info_msg(node):
-    logging.info('NODE: ' + str(node) + ', CHILDREN: ' + str(node.children))
+    logging.debug('NODE: ' + str(node) + ', CHILDREN: ' + str(node.children))
     for c in node.children:
         info_msg(c)
 

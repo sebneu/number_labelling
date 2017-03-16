@@ -3,6 +3,8 @@ import logging
 import os
 import hashlib
 
+import anycsv
+import flask
 import yaml
 from flask import Flask, request, redirect, url_for, jsonify, flash, render_template
 from werkzeug.utils import secure_filename
@@ -12,72 +14,31 @@ from labeller import NumLabeller
 
 
 app = Flask(__name__)
+app.secret_key = "multi-level labelling"
 
-def parse_text(text_input):
-    token = []
-    rows = text_input.split('\n')
-    for r in rows:
-        for t in r.split(' '):
-            tmp = t.strip()
-            if tmp:
-                token.append(tmp)
-    nums = [float(n) for n in token]
-    return nums
-
-
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file:
-            filename = secure_filename(file.filename)
-            print file.read()
-
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    '''
+def parse_data(values):
+    nums = []
+    missing = []
+    for v in values:
+        try:
+            n = float(v)
+            nums.append(n)
+        except:
+            missing.append(v)
+    return nums, missing
 
 
-@app.route('/labelling')
-def input():
-    # get args
-    filename = request.args.get('filename')
-    if not filename:
-        return '''
-        <!doctype html>
-        <title>Filename not allowed</title>
-        <h1>Filename not allowed!</h1>
-        '''
-    filename = secure_filename(filename)
-    num_of_neighbours = int(request.args.get('neighbours'))
-    try:
-        with open(os.path.join(app.config['UPLOAD_FOLDER'], filename)) as f:
-            data = parse_text(f.read())
-    except Exception as e:
-        return '''
-        <!doctype html>
-        <title>Input Error</title>
-        <h1>Error while parsing input!</h1>
-        <p>''' + e.message + '</p>'
+def isInt(value):
+  try:
+    int(value)
+    return True
+  except:
+    return False
 
-    neighbors = app.config['LABELLER'].get_candidates(data, num_of_neighbours)
+
+def get_response(values, neighbours):
+    data, invalid = parse_data(values)
+    neighbors = app.config['LABELLER'].get_candidates(data, neighbours)
     label_maj = labeller.label_prediction(neighbors)
     label_avg = labeller.label_prediction(neighbors, mode='avg')
 
@@ -86,6 +47,7 @@ def input():
 
     response = {
         'values': data,
+        'invalid': invalid,
         'neighbours': [[str(n[0]), round(n[1], 4)] for n in neighbors],
         'labelling': {
             'property': {
@@ -99,6 +61,36 @@ def input():
         }
     }
     return jsonify(response)
+
+
+@app.route('/labelling', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'csv' in request.files:
+            # get number of neighbours, default=10
+            neighbours = request.args.get('neighbours', '10')
+            if not isInt(neighbours):
+                flash('Invalid number of neighbours. Use "neighbours={count}". Default is 10.')
+                flask.abort(422, '\n'.join(flask.get_flashed_messages()))
+            column = request.args.get('column', '0')
+            if not isInt(column):
+                flash('Invalid column index specified. Use "column={index}" parameter. Default is 0')
+                flask.abort(422, '\n'.join(flask.get_flashed_messages()))
+            file = request.files['csv']
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+                flask.abort(400, '\n'.join(flask.get_flashed_messages()))
+            if file:
+                #filename = secure_filename(file.filename)
+                reader = anycsv.reader(content=file.read())
+                values = [r[int(column)] for r in reader]
+                return get_response(values=values, neighbours=int(neighbours))
+
+        flash('Use "csv" parameter to specify file')
+    return flask.abort(400, '\n'.join(flask.get_flashed_messages()))
 
 
 def parse_args():
@@ -130,8 +122,9 @@ if __name__ == "__main__":
     with open("config.yaml", 'r') as ymlfile:
         config = yaml.load(ymlfile)
     props = labeller.parse_props(config=config)
-    #num_labeller = NumLabeller(props, config)
-    #app.config['LABELLER'] = num_labeller
-    print 'graphs loaded'
-    logging.info("Server running: http://localhost:"+str(config['api']['port']))
+    num_labeller = NumLabeller(props, config)
+    app.config['LABELLER'] = num_labeller
+    logging.info("Finished branching. Graphs loaded in memory")
+    logging.info("Service running at: http://localhost:"+str(config['api']['port'])+'/labelling')
+    logging.info("Example curl request: curl -X POST -F csv=@/path/to/file.csv http://localhost:"+str(config['api']['port'])+"/labelling?column=1&neighbours=10")
     app.run(threaded=True, port=config['api']['port'], host='0.0.0.0')
