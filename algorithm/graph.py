@@ -1,10 +1,5 @@
-import argparse
 from collections import defaultdict
-import copy
-import bz2
 import os
-import pickle
-import itertools
 import math
 import scipy
 from sklearn import preprocessing

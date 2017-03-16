@@ -1,2 +1,6 @@
+-e git+git@github.com:sebneu/anycsv.git#egg=anycsv
+scipy
 sklearn
 pyyaml
+flask
+SPARQLWrapper

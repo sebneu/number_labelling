@@ -1,13 +1,11 @@
 import argparse
 import logging
 import os
-import hashlib
 
 import anycsv
 import flask
 import yaml
-from flask import Flask, request, redirect, url_for, jsonify, flash, render_template
-from werkzeug.utils import secure_filename
+from flask import Flask, request, jsonify, flash
 
 import labeller
 from labeller import NumLabeller
