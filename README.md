@@ -7,9 +7,9 @@ We apply a hierarchical clustering over information taken from DBpedia to build 
 * `$ git clone https://github.com/sebneu/number_labelling.git`
 * `$ cd number_labelling`
 * (optionally) setup virtual environment
-* virtualenv --system-site-packages labelling_env
-* . labelling_env/bin/activate
-* Install *anycsv* CSV parser
+* `virtualenv --system-site-packages labelling_env`
+* `. labelling_env/bin/activate`
+* Install [anycsv](https://github.com/sebneu/anycsv) CSV parser
 * `pip install git+git://github.com/sebneu/anycsv.git`
 * Install requirements 
 * `$ python setup.py install`
