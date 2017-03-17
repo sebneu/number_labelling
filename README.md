@@ -14,8 +14,8 @@ We apply a hierarchical clustering over information taken from DBpedia to build 
 * Install requirements 
 * `$ python setup.py install`
 * Setup local files
-* `$ tar -xzf local/common_types.tar.gz`
-* `$ tar -xzf local/subjects.tar.gz`
+* `$ tar -xzf local/common_types.tar.gz -C local`
+* `$ cat local/subjects.tar.gz.* | tar xzvf - -C local`
 * Run API service
 * `$ ./runner -h`  to show help
 * `$ ./runner -c config.yaml`  to start the API service
