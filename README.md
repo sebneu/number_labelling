@@ -5,7 +5,7 @@ We apply a hierarchical clustering over information taken from DBpedia to build 
 
 ## Setup
 The total setup-time for all 50 properties in props.csv takes 15-30 minutes and ~20GB of RAM.
-In order to test the system without built time use only a small subset of the properties with a lower number of corresponding subjects.
+In order to test the system without this extreme built time and requirements use only a small subset of properties with a lower number of corresponding subjects.
 
 * `$ git clone https://github.com/sebneu/number_labelling.git`
 * `$ cd number_labelling`
