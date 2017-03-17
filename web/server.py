@@ -124,6 +124,6 @@ def start():
     app.config['LABELLER'] = num_labeller
     logging.info("Finished branching. Graphs loaded in memory")
     logging.info("Service running at: http://localhost:"+str(config['api']['port'])+'/labelling')
-    logging.info("Example curl request: curl -X POST -F csv=@/path/to/file.csv http://localhost:"+str(config['api']['port'])+"/labelling?column=1&neighbours=10")
+    logging.info("Example curl request: curl -X POST -F csv=@testfile/stadiums.csv http://localhost:"+str(config['api']['port'])+"/labelling?column=2&neighbours=10")
     app.run(threaded=True, port=config['api']['port'], host='0.0.0.0')
 
