@@ -4,6 +4,9 @@
 We apply a hierarchical clustering over information taken from DBpedia to build a background knowledge graph of possible “semantic contexts” for bags of numerical values, over which we perform a nearest neighbour search to rank the most likely candidates.
 
 ## Setup
+The total setup-time for all 50 properties in props.csv takes 15-30 minutes and ~20GB of RAM.
+In order to test the system without built time use only a small subset of the properties with a lower number of corresponding subjects.
+
 * `$ git clone https://github.com/sebneu/number_labelling.git`
 * `$ cd number_labelling`
 * (optionally) setup virtual environment
@@ -20,4 +23,4 @@ We apply a hierarchical clustering over information taken from DBpedia to build 
 * `$ ./runner -h`  to show help
 * `$ ./runner -c config.yaml`  to start the API service
 * Example curl request:
-* `$ curl -X POST -F csv=@/path/to/file.csv http://localhost:8081/labelling?column=1&neighbours=10`
+* `$ curl -X POST -F csv=@testfile/stadiums.csv http://localhost:8081/labelling?column=2`
